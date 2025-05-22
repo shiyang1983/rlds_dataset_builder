@@ -30,10 +30,9 @@ def _generate_examples(paths) -> Iterator[Tuple[str, Any]]:
                 ()
             ]
             wrist_images = F["data"][f"demo_{demo_id}"]["obs"]["eye_in_hand_rgb"][()]
+            lang = F["data"][f"demo_{demo_id}"].attrs["lang"]
 
-        # compute language instruction
-        raw_file_string = os.path.basename(episode_path).split("/")[-1]
-        words = raw_file_string[:-10].split("_")
+        words = lang.split("_")
         command = ""
         for w in words:
             if "SCENE" in w:
@@ -41,6 +40,17 @@ def _generate_examples(paths) -> Iterator[Tuple[str, Any]]:
                 continue
             command = command + w + " "
         command = command[:-1]
+
+        # compute language instruction
+        # raw_file_string = os.path.basename(episode_path).split("/")[-1]
+        # words = raw_file_string[:-10].split("_")
+        # command = ""
+        # for w in words:
+        #     if "SCENE" in w:
+        #         command = ""
+        #         continue
+        #     command = command + w + " "
+        # command = command[:-1]
 
         # assemble episode --> here we're assuming demos so we set reward to 1 at the end
         episode = []
@@ -114,19 +124,19 @@ class Robocasa(MultiThreadedDatasetBuilder):
                             "observation": tfds.features.FeaturesDict(
                                 {
                                     "left_image": tfds.features.Image(
-                                        shape=(256, 256, 3),
+                                        shape=(128, 128, 3),
                                         dtype=np.uint8,
                                         encoding_format="jpeg",
                                         doc="Main camera RGB observation.",
                                     ),
                                     "right_image": tfds.features.Image(
-                                        shape=(256, 256, 3),
+                                        shape=(128, 128, 3),
                                         dtype=np.uint8,
                                         encoding_format="jpeg",
                                         doc="Main camera RGB observation.",
                                     ),
                                     "wrist_image": tfds.features.Image(
-                                        shape=(256, 256, 3),
+                                        shape=(128, 128, 3),
                                         dtype=np.uint8,
                                         encoding_format="jpeg",
                                         doc="Wrist camera RGB observation.",
@@ -185,5 +195,5 @@ class Robocasa(MultiThreadedDatasetBuilder):
     def _split_paths(self):
         """Define filepaths for data splits."""
         return {
-            "train": glob.glob("/home/yyshi/tmp/robocasa/*.hdf5"),
+            "train": glob.glob("/home/yyshi/tmp/robocasa/gen/*.hdf5"),
         }
